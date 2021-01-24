@@ -13,7 +13,7 @@ public class StartGame extends JFrame {
         GameDatabase.initializeDatabase();
         GameDatabase.deleteFromDatabase();
         statement = new JLabel("<html>We have selected a random number between 1 and 100." +
-                "<br/> See if you can guess it in 10 turns or fewer." +
+                "<br/> See if you can guess it in 5 turns or fewer." +
                 "<br/> We'll tell you if your guess was high or low.</html>");
         inputLabel = new JLabel("Enter a guess:");
         inputNumber = new JTextField();
@@ -49,7 +49,7 @@ public class StartGame extends JFrame {
                 move.setText("<html>You have taken " + count + " move</html>");
                 inputNumber.setEditable(false);
                 return;
-            } else if (count == 10) {
+            } else if (count == 5) {
                 suggestion.setText("<html>Game Over !!! <br/> You Lose</html>");
                 inputNumber.setEditable(false);
                 return;
@@ -60,11 +60,15 @@ public class StartGame extends JFrame {
                 if (n == randomNumber) {
                     suggestion.setText("<html>Game Over !!! <br/> You Won</html>");
                     move.setText("<html>You have taken " + count + " move</html>");
+                    inputNumber.setText("Number is "+randomNumber);
                     inputNumber.setEditable(false);
                     isWon = true;
+
                     GameDatabase.insertIntoDatabase(1, count);
                     GameDatabase.deleteFromDatabase();
                     displayRecentGame();
+
+                    GameDatabase.closeDatabase();
                     return;
                 } else if (n < randomNumber) {
                     suggestion.setText("Number is low");
@@ -72,13 +76,17 @@ public class StartGame extends JFrame {
                     suggestion.setText("Number is high");
                 }
                 count++;
-                move.setText("You have " + (10 - count) + " moves left");
-                if (count == 10) {
+                move.setText("You have " + (5 - count) + " moves left");
+                if (count == 5) {
                     suggestion.setText("<html>Game Over !!! <br/> You Lose</html>");
+                    inputNumber.setText("Number is "+randomNumber);
                     inputNumber.setEditable(false);
                     GameDatabase.insertIntoDatabase(0, count);
                     GameDatabase.deleteFromDatabase();
                     displayRecentGame();
+
+                    GameDatabase.closeDatabase();
+                    return;
                 }
             } catch (Exception ea) {
                 suggestion.setText("Invalid Input");
@@ -97,12 +105,9 @@ public class StartGame extends JFrame {
             move.setText("");
             count = 0;
             isWon = false;
-            randomNumber = (int) (Math.random() * 100 + 1);
-            System.out.println(randomNumber);
+            randomNumber=getRandomNumber();
         });
-
-        randomNumber = (int) (Math.random() * 100 + 1);
-        System.out.println(randomNumber);
+        randomNumber=getRandomNumber();
 
         move.setBounds(20, 160, 400, 30);
         prevGuess.setBounds(20, 140, 400, 30);
@@ -141,6 +146,12 @@ public class StartGame extends JFrame {
             prevGames[i].setBounds(20, y, 400, 50);
             y += 30;
         }
+    }
+
+    public int getRandomNumber(){
+        int randomNumber = (int) (Math.random() * 100 + 1);
+        System.out.println("Generated Random Number = "+randomNumber);
+        return randomNumber;
     }
 
     public static void main(String[] args) {
